@@ -1,5 +1,5 @@
-import React from 'react';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import React from "react";
+import { FaExclamationTriangle } from "react-icons/fa";
 
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
@@ -8,7 +8,12 @@ interface ConfirmDeleteModalProps {
   itemName: string;
 }
 
-const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ isOpen, onConfirm, onCancel, itemName }) => {
+const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
+  isOpen,
+  onConfirm,
+  onCancel,
+  itemName,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -18,7 +23,9 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ isOpen, onConfi
           <FaExclamationTriangle className="text-yellow-500 w-8 h-8 mr-2" />
           <h2 className="text-xl font-semibold">Confirm Delete</h2>
         </div>
-        <p className="mt-4">Are you sure you want to delete "{itemName}"?</p>
+        <p className="mt-4">
+          Are you sure you want to delete &quot;{itemName}&quot;?
+        </p>
         <div className="mt-6 flex justify-end space-x-4">
           <button
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
@@ -27,7 +34,7 @@ const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({ isOpen, onConfi
             Delete
           </button>
           <button
-            className="bg-gray-300 text-custom-gradient px-4 py-2 rounded hover:bg-gray-400"
+            className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
             onClick={onCancel}
           >
             Cancel
