@@ -35,6 +35,7 @@ export default async function handler(
 
         res.status(200).json({ providers, totalPages });
       } catch (error) {
+        console.error("Error fetching providers:", error);
         res.status(500).json({ error: "Error fetching providers" });
       }
       break;
@@ -53,12 +54,13 @@ export default async function handler(
           address,
           phone,
           description,
-          createdAt: new Date(), 
+          createdAt: new Date(),
         });
 
         const savedProvider = await newProvider.save();
         res.status(201).json(savedProvider);
       } catch (error) {
+        console.error("Error creating provider:", error);
         res.status(500).json({ error: "Error creating provider" });
       }
       break;
@@ -95,6 +97,7 @@ export default async function handler(
 
         res.status(200).json(updatedProvider);
       } catch (error) {
+        console.error("Error updating provider:", error);
         res.status(500).json({ error: "Error updating provider" });
       }
       break;
@@ -116,6 +119,7 @@ export default async function handler(
 
         res.status(200).json({ message: "Provider deleted successfully" });
       } catch (error) {
+        console.error("Error deleting provider:", error);
         res.status(500).json({ error: "Error deleting provider" });
       }
       break;

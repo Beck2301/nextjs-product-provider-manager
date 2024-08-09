@@ -14,8 +14,8 @@ export default async function handler(
       const {
         page = 1,
         limit = 5,
-        sortBy = "createdAt", 
-        order = "desc", 
+        sortBy = "createdAt",
+        order = "desc",
         filterBy,
         filterValue,
       } = req.query;
@@ -36,6 +36,7 @@ export default async function handler(
 
         res.status(200).json({ products, totalPages });
       } catch (error) {
+        console.error("Error fetching products:", error);
         res.status(500).json({ error: "Error fetching products" });
       }
       break;
@@ -54,12 +55,13 @@ export default async function handler(
           price,
           description,
           provider: provider || null,
-          createdAt: new Date(), 
+          createdAt: new Date(),
         });
 
         const savedProduct = await newProduct.save();
         res.status(201).json(savedProduct);
       } catch (error) {
+        console.error("Error creating product:", error);
         res.status(500).json({ error: "Error creating product" });
       }
       break;
@@ -85,7 +87,7 @@ export default async function handler(
             price,
             description,
             provider: provider || null,
-            updatedAt: new Date(), 
+            updatedAt: new Date(),
           },
           { new: true }
         );
@@ -96,6 +98,7 @@ export default async function handler(
 
         res.status(200).json(updatedProduct);
       } catch (error) {
+        console.error("Error updating product:", error);
         res.status(500).json({ error: "Error updating product" });
       }
       break;
@@ -117,6 +120,7 @@ export default async function handler(
 
         res.status(200).json({ message: "Product deleted successfully" });
       } catch (error) {
+        console.error("Error deleting product:", error);
         res.status(500).json({ error: "Error deleting product" });
       }
       break;
