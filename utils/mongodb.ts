@@ -11,12 +11,24 @@ if (!MONGO_URI) {
 let cachedClient: mongoose.Mongoose | null = null;
 
 export async function connectToDatabase() {
+  // Log para verificar si la URI está presente
+  console.log("MONGO_URI:", MONGO_URI);
+
   if (cachedClient) {
+    console.log("Usando cliente MongoDB en caché");
     return cachedClient;
   }
 
-  const client = await mongoose.connect(MONGO_URI);
+  try {
+    console.log("Intentando conectar a MongoDB...");
+    const client = await mongoose.connect(MONGO_URI);
 
-  cachedClient = client;
-  return client;
+    cachedClient = client;
+
+    console.log("Conexión a MongoDB exitosa");
+    return client;
+  } catch (error) {
+    console.error("Error conectando a MongoDB:", error);
+    throw new Error("No se pudo conectar a MongoDB");
+  }
 }
