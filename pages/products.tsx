@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ProductForm from "../components/ProductForm";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 interface Product {
   _id?: string;
@@ -16,6 +17,8 @@ const ProductsPage = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const fetchProducts = async (page: number) => {
     try {
@@ -35,13 +38,29 @@ const ProductsPage = () => {
     setSelectedProduct(product);
   };
 
-  const handleDelete = async (productId: string) => {
-    try {
-      await axios.delete(`/api/products/${productId}`);
-      setProducts(products.filter((product) => product._id !== productId));
-    } catch (error) {
-      console.error("Error deleting product:", error);
+  const handleDeleteClick = (productId: string) => {
+    setProductToDelete(productId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (productToDelete) {
+      try {
+        await axios.delete(`/api/products/${productToDelete}`);
+        setProducts(
+          products.filter((product) => product._id !== productToDelete)
+        );
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      }
+      setIsDeleteModalOpen(false);
+      setProductToDelete(null);
     }
+  };
+
+  const handleCancel = () => {
+    setIsDeleteModalOpen(false);
+    setProductToDelete(null);
   };
 
   const handlePageChange = (page: number) => {
@@ -81,7 +100,7 @@ const ProductsPage = () => {
                     <FaEdit />
                   </button>
                   <button
-                    onClick={() => handleDelete(product._id as string)}
+                    onClick={() => handleDeleteClick(product._id as string)}
                     className="text-red-500 hover:text-red-600"
                   >
                     <FaTrash />
@@ -109,6 +128,16 @@ const ProductsPage = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={handleCancel}
+        itemName={
+          products.find((product) => product._id === productToDelete)?.name ||
+          ""
+        }
+      />
     </div>
   );
 };

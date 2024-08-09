@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import ProviderForm from "../components/ProviderForm";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 interface Provider {
   _id?: string;
@@ -18,6 +19,8 @@ const ProvidersPage = () => {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [providerToDelete, setProviderToDelete] = useState<string | null>(null);
 
   const fetchProviders = async (page: number) => {
     try {
@@ -37,13 +40,29 @@ const ProvidersPage = () => {
     setSelectedProvider(provider);
   };
 
-  const handleDelete = async (providerId: string) => {
-    try {
-      await axios.delete(`/api/providers/${providerId}`);
-      setProviders(providers.filter((provider) => provider._id !== providerId));
-    } catch (error) {
-      console.error("Error deleting provider:", error);
+  const handleDeleteClick = (providerId: string) => {
+    setProviderToDelete(providerId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (providerToDelete) {
+      try {
+        await axios.delete(`/api/providers/${providerToDelete}`);
+        setProviders(
+          providers.filter((provider) => provider._id !== providerToDelete)
+        );
+      } catch (error) {
+        console.error("Error deleting provider:", error);
+      }
+      setIsDeleteModalOpen(false);
+      setProviderToDelete(null);
     }
+  };
+
+  const handleCancel = () => {
+    setIsDeleteModalOpen(false);
+    setProviderToDelete(null);
   };
 
   const handlePageChange = (page: number) => {
@@ -84,7 +103,7 @@ const ProvidersPage = () => {
                     <FaEdit />
                   </button>
                   <button
-                    onClick={() => handleDelete(provider._id as string)}
+                    onClick={() => handleDeleteClick(provider._id as string)}
                     className="text-red-500 hover:text-red-600"
                   >
                     <FaTrash />
@@ -112,6 +131,16 @@ const ProvidersPage = () => {
           </div>
         </div>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onConfirm={handleDelete}
+        onCancel={handleCancel}
+        itemName={
+          providers.find((provider) => provider._id === providerToDelete)
+            ?.name || ""
+        }
+      />
     </div>
   );
 };
