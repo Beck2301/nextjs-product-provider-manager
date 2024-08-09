@@ -3,12 +3,14 @@ import mongoose from "mongoose";
 import Product from "../../models/Product";
 import { connectToDatabase } from "../../utils/mongodb";
 
+(async () => {
+  await connectToDatabase();
+})();
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  await connectToDatabase();
-
   switch (req.method) {
     case "GET": {
       const {
