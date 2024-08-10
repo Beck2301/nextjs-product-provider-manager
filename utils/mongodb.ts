@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const MONGO_URI = process.env.MONGO_URI || "";
 
-// Verifica si la URI está presente
 if (!MONGO_URI) {
   throw new Error(
     "Please define the MONGO_URI environment variable inside .env.local"
@@ -12,10 +11,6 @@ if (!MONGO_URI) {
 let cachedClient: mongoose.Mongoose | null = null;
 
 export async function connectToDatabase() {
-  // Log para verificar si la URI está presente
-  console.log("MONGO_URI:", MONGO_URI);
-
-  // Verifica si hay una conexión en caché
   if (cachedClient) {
     console.log("Usando cliente MongoDB en caché");
     return cachedClient;
@@ -24,12 +19,20 @@ export async function connectToDatabase() {
   try {
     console.log("Intentando conectar a MongoDB...");
 
-    // Establecer la conexión a MongoDB
-    const client = await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 10000, // Tiempo de espera de 10 segundos
+    mongoose.connection.on("connected", () => {
+      console.log("Mongoose connected to", MONGO_URI);
     });
 
-    // Guardar la conexión en caché
+    mongoose.connection.on("error", (err) => {
+      console.error("Mongoose connection error:", err);
+    });
+
+    mongoose.connection.on("disconnected", () => {
+      console.log("Mongoose disconnected");
+    });
+
+    const client = await mongoose.connect(MONGO_URI);
+
     cachedClient = client;
 
     console.log("Conexión a MongoDB exitosa");
