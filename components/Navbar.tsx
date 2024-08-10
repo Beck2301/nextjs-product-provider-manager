@@ -10,9 +10,8 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-custom-gradient text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
-        {/* Envolver el texto MyApp en un componente Link */}
         <Link href="/" className="text-2xl font-semibold">
-          MyApp
+          <img src="/logo_white.png" alt="" />
         </Link>
         <button className="md:hidden flex items-center" onClick={toggleMenu}>
           {isOpen ? (

@@ -3,14 +3,12 @@ import mongoose from "mongoose";
 import Provider from "../../models/Provider";
 import { connectToDatabase } from "../../utils/mongodb";
 
-(async () => {
-  await connectToDatabase();
-})();
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await connectToDatabase();
+
   switch (req.method) {
     case "GET": {
       const {
@@ -18,21 +16,20 @@ export default async function handler(
         limit = 5,
         sortBy = "createdAt",
         order = "desc",
-        filterBy,
-        filterValue,
+        query,
       } = req.query;
-
       const sortOrder = order === "desc" ? -1 : 1;
-      const filter =
-        filterBy && filterValue ? { [filterBy as string]: filterValue } : {};
+      const searchQuery = query
+        ? { name: { $regex: query as string, $options: "i" } }
+        : {};
 
       try {
-        const providers = await Provider.find(filter)
+        const providers = await Provider.find(searchQuery)
           .sort({ [sortBy as string]: sortOrder })
           .skip((Number(page) - 1) * Number(limit))
           .limit(Number(limit));
 
-        const totalProviders = await Provider.countDocuments(filter);
+        const totalProviders = await Provider.countDocuments(searchQuery);
         const totalPages = Math.ceil(totalProviders / Number(limit));
 
         res.status(200).json({ providers, totalPages });

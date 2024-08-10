@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import ProductForm from "../components/ProductForm";
+import ProductForm from "@/components/ProductForm";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 
 interface Product {
   _id?: string;

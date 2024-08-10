@@ -1,6 +1,6 @@
 import Link from "next/link";
-import ProductList from "../components/ProductList";
-import ProviderList from "../components/ProviderList";
+import ProductList from "@/components/ProductList";
+import ProviderList from "@/components/ProviderList";
 
 const Home = () => {
   return (

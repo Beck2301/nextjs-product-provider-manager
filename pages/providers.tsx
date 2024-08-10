@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import ProviderForm from "../components/ProviderForm";
+import ProviderForm from "@/components/ProviderForm";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import ConfirmDeleteModal from "@/components/ConfirmDeleteModal";
 
 interface Provider {
   _id?: string;
