@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
           )}
         </button>
         <ul
-          className={`md:flex md:items-center md:space-x-4 absolute md:relative bg-custom-gradient md:bg-none w-full md:w-auto top-16 left-0 md:top-0 transition-transform transform ${
+          className={`md:flex md:items-center md:space-x-4 absolute md:relative bg-custom-gradient md:bg-none w-full md:w-auto top-20 left-0 md:top-0 transition-transform transform ${
             isOpen ? "translate-x-0" : "hidden"
           }`}
         >
