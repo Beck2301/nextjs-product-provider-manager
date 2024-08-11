@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa"; 
+import { FaBars, FaTimes } from "react-icons/fa";
 import Link from "next/link";
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <nav className="bg-custom-gradient text-white p-4">
@@ -26,17 +28,25 @@ const Navbar: React.FC = () => {
           }`}
         >
           <li>
-            <Link href="/" className="block px-4 py-2">
+            <Link href="/" className="block px-4 py-2" onClick={closeMenu}>
               Home
             </Link>
           </li>
           <li>
-            <Link href="/products" className="block px-4 py-2">
+            <Link
+              href="/products"
+              className="block px-4 py-2"
+              onClick={closeMenu}
+            >
               Products
             </Link>
           </li>
           <li>
-            <Link href="/providers" className="block px-4 py-2">
+            <Link
+              href="/providers"
+              className="block px-4 py-2"
+              onClick={closeMenu}
+            >
               Providers
             </Link>
           </li>
