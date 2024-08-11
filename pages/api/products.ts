@@ -3,131 +3,145 @@ import mongoose from "mongoose";
 import Product from "../../models/Product";
 import { connectToDatabase } from "../../utils/mongodb";
 
+const handleRequest = async (
+  req: NextApiRequest,
+  res: NextApiResponse,
+  callback: () => Promise<void>
+) => {
+  try {
+    await connectToDatabase();
+    await callback();
+  } catch (error) {
+    console.error("Request handling error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  await connectToDatabase();
+  await handleRequest(req, res, async () => {
+    switch (req.method) {
+      case "GET": {
+        const {
+          page = 1,
+          limit = 5,
+          sortBy = "createdAt",
+          order = "desc",
+          query,
+        } = req.query;
+        const sortOrder = order === "desc" ? -1 : 1;
+        const searchQuery = query
+          ? { name: { $regex: query as string, $options: "i" } }
+          : {};
 
-  switch (req.method) {
-    case "GET": {
-      const {
-        page = 1,
-        limit = 5,
-        sortBy = "createdAt",
-        order = "desc",
-        query,
-      } = req.query;
-      const sortOrder = order === "desc" ? -1 : 1;
-      const searchQuery = query
-        ? { name: { $regex: query as string, $options: "i" } }
-        : {};
+        try {
+          const products = await Product.find(searchQuery)
+            .sort({ [sortBy as string]: sortOrder })
+            .skip((Number(page) - 1) * Number(limit))
+            .limit(Number(limit))
+            .populate("provider");
 
-      try {
-        const products = await Product.find(searchQuery)
-          .sort({ [sortBy as string]: sortOrder })
-          .skip((Number(page) - 1) * Number(limit))
-          .limit(Number(limit))
-          .populate("provider");
+          const totalProducts = await Product.countDocuments(searchQuery);
+          const totalPages = Math.ceil(totalProducts / Number(limit));
 
-        const totalProducts = await Product.countDocuments(searchQuery);
-        const totalPages = Math.ceil(totalProducts / Number(limit));
-
-        res.status(200).json({ products, totalPages });
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        res.status(500).json({ error: "Error fetching products" });
-      }
-      break;
-    }
-
-    case "POST": {
-      const { name, price, description, provider } = req.body;
-
-      if (!name || !price) {
-        return res.status(400).json({ error: "Name and price are required" });
+          res.status(200).json({ products, totalPages });
+        } catch (error) {
+          console.error("Error fetching products:", error);
+          res.status(500).json({ error: "Error fetching products" });
+        }
+        break;
       }
 
-      try {
-        const newProduct = new Product({
-          name,
-          price,
-          description,
-          provider: provider || null,
-          createdAt: new Date(),
-        });
+      case "POST": {
+        const { name, price, description, provider } = req.body;
 
-        const savedProduct = await newProduct.save();
-        res.status(201).json(savedProduct);
-      } catch (error) {
-        console.error("Error creating product:", error);
-        res.status(500).json({ error: "Error creating product" });
-      }
-      break;
-    }
+        if (!name || !price) {
+          return res.status(400).json({ error: "Name and price are required" });
+        }
 
-    case "PUT": {
-      const { id } = req.query;
-      const { name, price, description, provider } = req.body;
-
-      if (!mongoose.Types.ObjectId.isValid(id as string)) {
-        return res.status(400).json({ error: "Invalid product ID" });
-      }
-
-      if (!name || !price) {
-        return res.status(400).json({ error: "Name and price are required" });
-      }
-
-      try {
-        const updatedProduct = await Product.findByIdAndUpdate(
-          id,
-          {
+        try {
+          const newProduct = new Product({
             name,
             price,
             description,
             provider: provider || null,
-            updatedAt: new Date(),
-          },
-          { new: true }
-        );
+            createdAt: new Date(),
+          });
 
-        if (!updatedProduct) {
-          return res.status(404).json({ error: "Product not found" });
+          const savedProduct = await newProduct.save();
+          res.status(201).json(savedProduct);
+        } catch (error) {
+          console.error("Error creating product:", error);
+          res.status(500).json({ error: "Error creating product" });
+        }
+        break;
+      }
+
+      case "PUT": {
+        const { id } = req.query;
+        const { name, price, description, provider } = req.body;
+
+        if (!mongoose.Types.ObjectId.isValid(id as string)) {
+          return res.status(400).json({ error: "Invalid product ID" });
         }
 
-        res.status(200).json(updatedProduct);
-      } catch (error) {
-        console.error("Error updating product:", error);
-        res.status(500).json({ error: "Error updating product" });
-      }
-      break;
-    }
-
-    case "DELETE": {
-      const { id } = req.query;
-
-      if (!mongoose.Types.ObjectId.isValid(id as string)) {
-        return res.status(400).json({ error: "Invalid product ID" });
-      }
-
-      try {
-        const deletedProduct = await Product.findByIdAndDelete(id);
-
-        if (!deletedProduct) {
-          return res.status(404).json({ error: "Product not found" });
+        if (!name || !price) {
+          return res.status(400).json({ error: "Name and price are required" });
         }
 
-        res.status(200).json({ message: "Product deleted successfully" });
-      } catch (error) {
-        console.error("Error deleting product:", error);
-        res.status(500).json({ error: "Error deleting product" });
-      }
-      break;
-    }
+        try {
+          const updatedProduct = await Product.findByIdAndUpdate(
+            id,
+            {
+              name,
+              price,
+              description,
+              provider: provider || null,
+              updatedAt: new Date(),
+            },
+            { new: true }
+          );
 
-    default:
-      res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
-      res.status(405).end(`Method ${req.method} Not Allowed`);
-      break;
-  }
+          if (!updatedProduct) {
+            return res.status(404).json({ error: "Product not found" });
+          }
+
+          res.status(200).json(updatedProduct);
+        } catch (error) {
+          console.error("Error updating product:", error);
+          res.status(500).json({ error: "Error updating product" });
+        }
+        break;
+      }
+
+      case "DELETE": {
+        const { id } = req.query;
+
+        if (!mongoose.Types.ObjectId.isValid(id as string)) {
+          return res.status(400).json({ error: "Invalid product ID" });
+        }
+
+        try {
+          const deletedProduct = await Product.findByIdAndDelete(id);
+
+          if (!deletedProduct) {
+            return res.status(404).json({ error: "Product not found" });
+          }
+
+          res.status(200).json({ message: "Product deleted successfully" });
+        } catch (error) {
+          console.error("Error deleting product:", error);
+          res.status(500).json({ error: "Error deleting product" });
+        }
+        break;
+      }
+
+      default:
+        res.setHeader("Allow", ["GET", "POST", "PUT", "DELETE"]);
+        res.status(405).end(`Method ${req.method} Not Allowed`);
+        break;
+    }
+  });
 }
