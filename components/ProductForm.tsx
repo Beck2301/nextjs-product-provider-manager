@@ -11,7 +11,7 @@ interface Product {
   name: string;
   price: number;
   description?: string;
-  provider?: string; 
+  provider?: string;
 }
 
 interface ProductFormProps {
@@ -29,6 +29,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
   });
 
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -49,7 +50,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
         const response = await axios.get<{ providers: Provider[] }>(
           "/api/providers"
         );
-        
         setProviders(response.data.providers);
       } catch (error) {
         console.error("Error fetching providers:", error);
@@ -68,8 +68,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  const validateForm = () => {
+    const newErrors: string[] = [];
+    if (!formData.name) newErrors.push("Name is required.");
+    if (formData.price <= 0) newErrors.push("Price must be greater than 0.");
+    if (!formData.provider) newErrors.push("Provider is required.");
+    setErrors(newErrors);
+    return newErrors.length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) return;
     try {
       if (product?._id) {
         await axios.put(`/api/products/${product._id}`, formData);
@@ -87,6 +97,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
       onSubmit={handleSubmit}
       className="space-y-4 p-4 bg-white shadow-md rounded-md"
     >
+      {errors.length > 0 && (
+        <div className="text-red-500">
+          <ul>
+            {errors.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div>
         <label
           htmlFor="name"
@@ -149,6 +168,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
           value={formData.provider || ""}
           onChange={handleChange}
           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+          required
         >
           <option value="">Select a provider</option>
           {providers.map((provider) => (
